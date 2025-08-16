@@ -1,4 +1,4 @@
-module coinlila.com/coinbot
+module github.com/chidi150c/coinlila/coinbot
 
 go 1.23.0
 
