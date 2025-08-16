@@ -1,0 +1,22 @@
+# build artifacts
+/coinbot
+/dist/
+bin/
+*.exe
+*.out
+
+# IDE
+.vscode/
+.idea/
+
+# env & secrets
+.env
+.env.*
+*.key
+*.pem
+*.crt
+
+# caches
+go.sum
+
+binance_API_Key
