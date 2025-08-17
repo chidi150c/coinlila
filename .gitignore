@@ -1,9 +1,13 @@
 # build artifacts
+day_snapshot.json
+/dist
+/outto  
 /coinbot
 /dist/
 bin/
 *.exe
 *.out
+*.log
 
 # IDE
 .vscode/
@@ -15,8 +19,8 @@ bin/
 *.key
 *.pem
 *.crt
+.envrc
+
 
 # caches
 go.sum
-
-binance_API_Key
