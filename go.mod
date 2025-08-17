@@ -1,4 +1,4 @@
-module github.com/chidi150c/coinlila/coinbot
+module github.com/chidi150c/coinlila
 
 go 1.23.0
 
@@ -21,3 +21,5 @@ require (
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/chidi150c/coinlila => .

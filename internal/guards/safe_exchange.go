@@ -10,8 +10,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"example.com/coinbot/internal/exchange"
-	"example.com/coinbot/internal/risk"
+	"github.com/chidi150c/coinlila/internal/exchange"
+	"github.com/chidi150c/coinlila/internal/risk"
 )
 
 type breakerState int
@@ -84,7 +84,7 @@ func NewSafeExchange(
 ) *SafeExchange {
 	if breakerThreshold < 1 { breakerThreshold = 3 }
 	if breakerHalfOpenProbes < 1 { breakerHalfOpenProbes = 1 }
-	se := &SafeExchange{
+	return &SafeExchange{
 		inner:        inner,
 		riskS:        rs,
 		lim:          lim,
@@ -97,7 +97,6 @@ func NewSafeExchange(
 		cooldown:     breakerCooldown,
 		halfMax:      breakerHalfOpenProbes,
 	}
-	return se
 }
 
 func (s *SafeExchange) BestBidAsk(symbol string) (float64, float64, error) { return s.inner.BestBidAsk(symbol) }
@@ -173,10 +172,7 @@ func (s *SafeExchange) rateExceeded(now time.Time) bool {
 	}
 	s.orderTimes = s.orderTimes[:j]
 	metricRateWindow.Set(float64(len(s.orderTimes)))
-	if s.perMinuteCap > 0 && len(s.orderTimes) >= s.perMinuteCap {
-		return true
-	}
-	return false
+	return s.perMinuteCap > 0 && len(s.orderTimes) >= s.perMinuteCap
 }
 
 func (s *SafeExchange) rateNote(t time.Time) {
@@ -199,15 +195,15 @@ func (s *SafeExchange) allowBreaker(now time.Time) bool {
 			s.bState = breakerHalfOpen
 			s.halfProbes = 0
 			metricBreakerState.Set(1)
-			return true // allow a probe
+			return true // allow first probe
 		}
 		return false
 	case breakerHalfOpen:
-		// allow limited probes
+		// allow limited probes, increment when we grant one
 		if s.halfProbes < s.halfMax {
+			s.halfProbes++
 			return true
 		}
-		// no more probes; keep waiting (should not really happen unless caller loops too fast)
 		return false
 	default:
 		return false
@@ -232,7 +228,7 @@ func (s *SafeExchange) noteSuccess(now time.Time, okey string) {
 		s.failStreak = 0
 		metricBreakerState.Set(0)
 	case breakerOpen:
-		// shouldn't get here (allowBreaker would have blocked), ignore
+		// shouldn't happen (allowBreaker would block), ignore
 	}
 }
 
@@ -254,10 +250,10 @@ func (s *SafeExchange) noteFailure(now time.Time) {
 		// failed probe -> reopen immediately
 		s.openedAt = now
 		s.bState = breakerOpen
-		s.failStreak = s.threshold // keep at threshold
+		s.failStreak = s.threshold
 		metricBreakerState.Set(2)
 	case breakerOpen:
-		// already open, keep timer fresh (optional)
+		// already open; keep timer fresh (optional)
 		s.openedAt = now
 	}
 	metricOrdersSuppressed.Inc()

@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"example.com/coinbot/internal/util"
+	"github.com/chidi150c/coinlila/internal/util"
 )
 
 type DayManager struct {
